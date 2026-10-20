@@ -1,9 +1,9 @@
 // Applies administrator-managed branding to every public page.
-// The official Furtuna Skin logo (assets/furtunaskin.svg) is the platform mark and
+// The official BYOMA logo (assets/byomalogo.jpg) is the platform mark and
 // is used consistently; administrators can still tune colours, fonts and copy.
 
-export const OFFICIAL_LOGO = '/assets/furtunaskin.svg';
-const DEFAULT_BRAND = 'Furtuna Skin';
+export const OFFICIAL_LOGO = '/assets/byomalogo.jpg';
+const DEFAULT_BRAND = 'BYOMA';
 
 function luminance(hex) {
   const value = String(hex || '').replace('#', '');

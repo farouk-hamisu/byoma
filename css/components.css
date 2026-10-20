@@ -360,6 +360,13 @@
   text-align: center;
 }
 
+.page-loader__logo {
+  width: 3rem;
+  height: 3rem;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+}
+
 .page-loader__spinner {
   width: 2rem;
   height: 2rem;

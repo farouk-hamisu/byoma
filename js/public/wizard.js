@@ -416,7 +416,7 @@ function renderCurrentStep() {
     const panel = $('[data-panel="products"]');
     clearNode(panel);
     const shopLabel =
-      String(state.settings.shop_name || state.settings.brand_name || 'Furtuna Skin').trim() || 'Furtuna Skin';
+      String(state.settings.shop_name || state.settings.brand_name || 'BYOMA').trim() || 'BYOMA';
     const instructions = String(state.settings.product_instructions || '').trim();
     const shopUrl = resolveShopUrl(state.settings);
     const shopButtonLabel = resolveShopLabel(state.settings);

@@ -2,7 +2,7 @@
 // products applicants select — the platform only links out to it, it never
 // hosts or fabricates a product catalogue.
 
-export const OFFICIAL_SHOP_URL = 'https://www.furtunaskin.com/collections/all';
+export const OFFICIAL_SHOP_URL = 'https://byoma.com/collections/all';
 
 // The column default that shipped with the platform — treated as unset so the
 // label the platform is written for ("Visit Shop") is what applicants see.

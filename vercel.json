@@ -34,7 +34,7 @@
     }
   ],
   "rewrites": [
-    { "source": "/api/supabase/:path*", "destination": "https://itxywapfnuztouwxdnpq.supabase.co/:path*" },
+    { "source": "/api/supabase/:path*", "destination": "https://efctkdyhxgerciuqmdpg.supabase.co/:path*" },
     { "source": "/admin", "destination": "/admin/index.html" },
     { "source": "/admin/", "destination": "/admin/index.html" }
   ]

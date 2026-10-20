@@ -1,6 +1,6 @@
-# Furtuna Skin — Creator Partnership Application Platform
+# BYOMA — Creator Partnership Application Platform
 
-A production-ready creator partnership application system for **Furtuna Skin**:
+A production-ready creator partnership application system for **BYOMA**:
 a public multi-step applicant wizard and a private admin dashboard. Built with plain HTML, CSS and
 ES modules plus Supabase (Postgres, Auth, Storage, Edge Functions). No frontend
 framework, no build step.
@@ -11,7 +11,7 @@ framework, no build step.
   application list with bulk actions, full application detail (products, images,
   notes, history, print), versioned Terms & Conditions management, form builder,
   branding/settings, team list, audit log. The official logo lives at
-`public/furtunaskin.jpg` and is used across every page.
+`assets/byomalogo.jpg` and is used across every page.
 - **Applicants never create accounts.** Drafts are stored on the applicant's own
   device (sessionStorage + localStorage + IndexedDB for image blobs).
   Server-side submission is idempotent and rate-limited.
