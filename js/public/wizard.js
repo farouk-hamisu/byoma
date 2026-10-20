@@ -17,7 +17,7 @@ import { renderFieldStep, validateField, validateHandlesList } from './step-fiel
 import { createProductGrid, createEmptyProduct, ACCEPTED_IMAGE_TYPES, hasReadyScreenshot } from './product-grid.js';
 import { openTermsViewer } from './terms-viewer.js';
 import { renderReview } from './review.js';
-import { showLoader, hideLoader } from './loader.js';
+import { showLoader, hideLoader } from './page-loader.js';
 
 const STEP_COUNT = 5;
 const STEP_TITLES = [

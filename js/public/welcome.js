@@ -6,7 +6,7 @@ import { hasStoredDraft, clearDraft } from '../utils/draft.js';
 import { loadPublicSettings } from './api.js';
 import { applyBranding, pageTitle } from './branding.js';
 import { openTermsViewer } from './terms-viewer.js';
-import { showLoader, NAV_FLAG } from './loader.js';
+import { showLoader, NAV_FLAG } from './page-loader.js';
 
 const COPY_KEYS = [
   'welcome_eyebrow',
