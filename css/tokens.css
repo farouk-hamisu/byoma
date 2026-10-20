@@ -1,0 +1,90 @@
+/* Design tokens. Brand colors, fonts and copy are applied at runtime from
+   application_settings (see js/public/branding.js). */
+
+:root {
+  /* Brand (defaults, overwritten dynamically) */
+  --color-primary: #1f3a32;
+  --color-primary-contrast: #ffffff;
+  --color-secondary: #b98a4b;
+  --color-bg: #faf8f4;
+
+  /* Neutrals */
+  --color-surface: #ffffff;
+  --color-surface-alt: #f5f2ec;
+  --color-text: #1b1b19;
+  --color-text-muted: #5c605b;
+  --color-text-inverse: #ffffff;
+  --color-border: #e4e0d7;
+  --color-border-strong: #cfc9bd;
+
+  /* Status */
+  --color-danger: #b42318;
+  --color-danger-bg: #fdf3f2;
+  --color-success: #18794e;
+  --color-success-bg: #eefbf4;
+  --color-warning: #9a6700;
+  --color-warning-bg: #fff8e8;
+  --color-info: #0b6bcb;
+  --color-info-bg: #eef6ff;
+
+  /* Typography */
+  --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-display: Georgia, "Times New Roman", serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: clamp(1.375rem, 1.15rem + 1vw, 1.6rem);
+  --text-2xl: clamp(1.75rem, 1.4rem + 1.7vw, 2.35rem);
+  --text-3xl: clamp(2.1rem, 1.6rem + 2.6vw, 3.1rem);
+
+  --leading-tight: 1.15;
+  --leading-normal: 1.6;
+
+  /* Space scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+  --space-10: 6rem;
+  --space-12: 7.5rem;
+  --space-16: 10rem;
+
+  /* Shape */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 999px;
+
+  --transition: 160ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  --container: 68rem;
+  --container-narrow: 52rem;
+  --header-height: 4rem;
+}
+
+html[data-font="editorial"] {
+  --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-display: Georgia, "Times New Roman", Times, serif;
+}
+
+html[data-font="modern"] {
+  --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-display: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+html[data-font="classic"] {
+  --font-body: "Charter", "Bitstream Charter", "Cambria", Georgia, serif;
+  --font-display: "Charter", "Bitstream Charter", "Cambria", Georgia, serif;
+}

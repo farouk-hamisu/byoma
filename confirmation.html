@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>Application received · Fortuna Skin</title>
+  <link rel="icon" type="image/jpeg" href="/public/furtunaskin.jpg" />
+  <script src="/env.js"></script>
+  <link rel="stylesheet" href="/css/tokens.css" />
+  <link rel="stylesheet" href="/css/base.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <link rel="stylesheet" href="/css/welcome.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script type="module" src="/js/public/confirmation.js"></script>
+</head>
+<body data-page="confirmation">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="/">
+        <img class="brand__logo" data-brand-logo src="/public/furtunaskin.jpg" alt="Fortuna Skin" width="40" height="40" />
+        <span class="brand__name" data-brand-name>Fortuna Skin</span>
+      </a>
+      <nav class="site-nav" aria-label="Utility">
+        <a class="site-nav__link" href="/">Home</a>
+        <a class="site-nav__link" data-privacy-link href="/privacy.html">Privacy</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="site-main">
+    <section class="container confirmation">
+      <div class="card confirmation__card" role="status">
+        <div class="confirmation__badge" aria-hidden="true">✓</div>
+        <h1 class="confirmation__title">Application received</h1>
+        <p class="confirmation__lede">
+          Thank you — your Fortuna Skin partnership application has been submitted successfully.
+          Our team will review it and get back to you.
+        </p>
+
+        <dl class="confirmation__meta">
+          <div>
+            <dt>Your reference</dt>
+            <dd><strong data-reference>—</strong></dd>
+          </div>
+          <div>
+            <dt>Screenshots submitted</dt>
+            <dd data-product-count>—</dd>
+          </div>
+          <div>
+            <dt>Terms accepted</dt>
+            <dd data-terms-version>—</dd>
+          </div>
+        </dl>
+
+        <p class="confirmation__note">
+          A confirmation email is on its way if you provided a valid address. Keep your
+          reference handy — you may need it when we contact you.
+        </p>
+
+        <div class="confirmation__actions">
+          <a href="/" class="btn btn--primary">Back to home</a>
+          <button type="button" class="btn btn--secondary" data-save-pdf>Save this page as PDF</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <p data-footer-text>© 2026 Fortuna Skin</p>
+      <nav class="site-footer__nav" aria-label="Footer">
+        <a href="/">Home</a>
+        <a data-privacy-link href="/privacy.html">Privacy</a>
+        <a data-contact-email data-contact-label="Contact" href="#" hidden>Contact</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

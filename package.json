@@ -1,0 +1,14 @@
+{
+  "name": "partnershipy",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Fortuna Skin creator partnership application platform (HTML/CSS/Vanilla JS + Supabase)",
+  "scripts": {
+    "env": "node scripts/generate-env.js",
+    "serve": "node scripts/serve.js",
+    "check": "node scripts/check-js.js",
+    "bundle": "node scripts/bundle-functions.mjs",
+    "test:db": "bash supabase/tests/run.sh"
+  }
+}

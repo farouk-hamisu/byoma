@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Dashboard · Fortuna Skin</title>
+  <link rel="icon" type="image/jpeg" href="/public/furtunaskin.jpg" />
+  <script src="/env.js"></script>
+  <link rel="stylesheet" href="/css/tokens.css" />
+  <link rel="stylesheet" href="/css/base.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <link rel="stylesheet" href="/css/admin.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script type="module" src="/js/admin/dashboard.js"></script>
+</head>
+<body data-admin-guard>
+  <div class="admin-layout">
+    <aside class="admin-sidebar" data-admin-sidebar></aside>
+    <div class="admin-main">
+      <header class="admin-header" data-admin-header></header>
+      <main class="admin-content" id="main">
+        <div>
+          <h1 class="admin-page-title">Dashboard</h1>
+          <p class="admin-page-subtitle">Overview of partnership applications.</p>
+        </div>
+
+        <div class="stat-grid" data-stats aria-live="polite">
+          <div class="stat-card"><div class="skeleton" style="height:2.5rem"></div></div>
+          <div class="stat-card"><div class="skeleton" style="height:2.5rem"></div></div>
+          <div class="stat-card"><div class="skeleton" style="height:2.5rem"></div></div>
+          <div class="stat-card"><div class="skeleton" style="height:2.5rem"></div></div>
+        </div>
+
+        <section class="detail-section" data-chart-section hidden>
+          <h2 class="detail-section__title">Applications per day</h2>
+          <div class="bars" data-chart role="img" aria-label="Daily application volume"></div>
+          <p class="bars__label" data-chart-label></p>
+        </section>
+
+        <section class="detail-section">
+          <h2 class="detail-section__title">Recent applications</h2>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Reference</th>
+                  <th>Name</th>
+                  <th>Status</th>
+                  <th>Products</th>
+                  <th>Submitted</th>
+                </tr>
+              </thead>
+              <tbody data-recent>
+                <tr><td colspan="5" class="empty">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="margin-top:var(--space-4)">
+            <a class="btn btn--secondary btn--sm" href="/admin/applications.html">View all applications</a>
+          </p>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

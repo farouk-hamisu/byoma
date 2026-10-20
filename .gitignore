@@ -1,0 +1,12 @@
+# Local environment — never commit real values
+.env
+.env.*
+!.env.example
+
+# Generated browser config (placeholders locally; real values come from CI/env)
+env.js
+
+# Dependencies / tooling
+node_modules/
+.DS_Store
+*.log

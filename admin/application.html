@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Application · Fortuna Skin</title>
+  <link rel="icon" type="image/jpeg" href="/public/furtunaskin.jpg" />
+  <script src="/env.js"></script>
+  <link rel="stylesheet" href="/css/tokens.css" />
+  <link rel="stylesheet" href="/css/base.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <link rel="stylesheet" href="/css/admin.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script type="module" src="/js/admin/application-detail.js"></script>
+</head>
+<body data-admin-guard>
+  <div class="admin-layout">
+    <aside class="admin-sidebar" data-admin-sidebar></aside>
+    <div class="admin-main">
+      <header class="admin-header" data-admin-header></header>
+      <main class="admin-content" id="main">
+        <div style="display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:baseline;justify-content:space-between">
+          <div>
+            <h1 class="admin-page-title" data-title>Loading…</h1>
+            <p class="admin-page-subtitle" data-subtitle></p>
+          </div>
+          <div style="display:flex;gap:var(--space-2);flex-wrap:wrap">
+            <a class="btn btn--ghost btn--sm" href="/admin/applications.html">← All applications</a>
+            <button type="button" class="btn btn--secondary btn--sm" data-print>Print / PDF</button>
+          </div>
+        </div>
+
+        <div class="alert alert--danger" data-page-error hidden role="alert"></div>
+
+        <div class="detail-grid" data-detail hidden>
+          <div class="detail-pane">
+            <section class="detail-section">
+              <h2 class="detail-section__title">Applicant</h2>
+              <dl class="detail-list" data-applicant></dl>
+            </section>
+
+            <section class="detail-section">
+              <h2 class="detail-section__title">Products <span data-product-count class="admin-page-subtitle"></span></h2>
+              <div data-products style="display:flex;flex-direction:column;gap:var(--space-4)"></div>
+            </section>
+
+            <section class="detail-section">
+              <h2 class="detail-section__title">Internal notes</h2>
+              <form data-note-form style="margin-bottom:var(--space-4)">
+                <div class="field">
+                  <label class="visually-hidden" for="note-body">Note</label>
+                  <textarea class="input input--textarea" id="note-body" rows="3" placeholder="Add a note for your team…"></textarea>
+                </div>
+                <button type="submit" class="btn btn--secondary btn--sm" style="margin-top:var(--space-2)">Add note</button>
+              </form>
+              <div class="notes-list" data-notes></div>
+            </section>
+          </div>
+
+          <div class="detail-pane">
+            <section class="detail-section">
+              <h2 class="detail-section__title">Status</h2>
+              <div class="field" style="margin-bottom:var(--space-3)">
+                <label class="field__label" for="status-select">Change status</label>
+                <select class="input" id="status-select">
+                  <option value="new">New</option>
+                  <option value="under_review">Under review</option>
+                  <option value="more_info">More info needed</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+              <div class="field" style="margin-bottom:var(--space-3)">
+                <label class="field__label" for="status-reason">Reason (optional, stored in history)</label>
+                <textarea class="input input--textarea" id="status-reason" rows="2"></textarea>
+              </div>
+              <button type="button" class="btn btn--primary btn--sm" data-save-status>Update status</button>
+            </section>
+
+            <section class="detail-section">
+              <h2 class="detail-section__title">Reviewer</h2>
+              <div class="field">
+                <label class="visually-hidden" for="reviewer-select">Assign reviewer</label>
+                <select class="input" id="reviewer-select">
+                  <option value="">Unassigned</option>
+                </select>
+              </div>
+            </section>
+
+            <section class="detail-section">
+              <h2 class="detail-section__title">Consent & terms</h2>
+              <dl class="detail-list" data-terms></dl>
+            </section>
+
+            <section class="detail-section">
+              <h2 class="detail-section__title">History</h2>
+              <ul class="history-list" data-history></ul>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>
