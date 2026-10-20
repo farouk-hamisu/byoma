@@ -3,8 +3,10 @@
 .env.*
 !.env.example
 
-# Generated browser config (placeholders locally; real values come from CI/env)
-env.js
+# Note: env.js is intentionally committed — it holds only public-safe values
+# (Supabase URL + anon key, which ship to every browser) so Git-based deploys
+# (e.g. Vercel) work with zero extra configuration. The service-role key and
+# secrets live only in .env and Supabase, never in env.js.
 
 # Dependencies / tooling
 node_modules/
