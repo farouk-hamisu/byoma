@@ -1,8 +1,8 @@
 // Applies administrator-managed branding to every public page.
-// The official Fortuna Skin logo (public/furtunaskin.jpg) is the platform mark and
+// The official Fortuna Skin logo (assets/furtunaskin.svg) is the platform mark and
 // is used consistently; administrators can still tune colours, fonts and copy.
 
-export const OFFICIAL_LOGO = '/public/furtunaskin.jpg';
+export const OFFICIAL_LOGO = '/assets/furtunaskin.svg';
 const DEFAULT_BRAND = 'Fortuna Skin';
 
 function luminance(hex) {

@@ -24,7 +24,7 @@ export function renderShell({ profile, active = null } = {}) {
   const brand = el('a', { class: 'admin-brand', href: '/admin/' }, [
     el('img', {
       class: 'admin-brand__logo',
-      src: '/public/furtunaskin.jpg',
+      src: '/assets/furtunaskin.svg',
       alt: '',
       width: '28',
       height: '28',

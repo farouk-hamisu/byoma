@@ -1,0 +1,7 @@
+# Never upload local secrets or tooling to Vercel
+.env
+.env.*
+node_modules
+.git
+*.log
+.DS_Store

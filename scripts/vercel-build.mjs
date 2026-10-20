@@ -17,7 +17,7 @@ const SITE_ENTRIES = [
   'env.js',
   'css',
   'js',
-  'public',
+  'assets',
   'admin',
 ];
 
