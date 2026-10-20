@@ -11,6 +11,7 @@
 import { el, clearNode } from '../utils/dom.js';
 import { formatBytes } from '../utils/format.js';
 import { putImage, getImage, deleteImage } from '../utils/idb.js';
+import { resolveShopUrl } from './shop.js';
 
 const MAX_PRODUCTS_DEFAULT = 30;
 const MAX_FILES_PER_PRODUCT = 1; // one screenshot per upload field (30 fields = 30 images)
@@ -492,7 +493,14 @@ export function createProductGrid({ state, onChange, uploadFile, maxProducts = M
           el('p', { class: 'empty-state__title', text: 'No screenshots yet' }),
           el('p', {
             class: 'empty-state__text',
-            text: 'Add a screenshot field, then upload a clear screenshot of a product you have selected directly from the shop product page.',
+            text: 'Add a screenshot field, then upload a clear screenshot of a product you selected directly from the shop product page.',
+          }),
+          el('a', {
+            class: 'btn btn--secondary btn--sm',
+            href: resolveShopUrl(state.settings),
+            target: '_blank',
+            rel: 'noopener noreferrer',
+            text: 'Browse Products',
           }),
         ]),
       );

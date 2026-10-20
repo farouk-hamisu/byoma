@@ -13,17 +13,18 @@ import {
   submitApplication,
 } from './api.js';
 import { applyBranding, pageTitle } from './branding.js';
+import { applyShopLinks, resolveShopUrl, resolveShopLabel } from './shop.js';
 import { renderFieldStep, validateField, validateHandlesList } from './step-fields.js';
 import { createProductGrid, createEmptyProduct, ACCEPTED_IMAGE_TYPES, hasReadyScreenshot } from './product-grid.js';
 import { openTermsViewer } from './terms-viewer.js';
 import { renderReview } from './review.js';
-import { showLoader, hideLoader } from './loader.js';
+import { showLoader, hideLoader } from './page-loader.js';
 
 const STEP_COUNT = 5;
 const STEP_TITLES = [
   'Your details',
   'Your channels',
-  'Screenshots',
+  'Select products',
   'Terms & consent',
   'Review & submit',
 ];
@@ -417,35 +418,38 @@ function renderCurrentStep() {
     const shopLabel =
       String(state.settings.shop_name || state.settings.brand_name || 'Furtuna Skin').trim() || 'Furtuna Skin';
     const instructions = String(state.settings.product_instructions || '').trim();
+    const shopUrl = resolveShopUrl(state.settings);
+    const shopButtonLabel = resolveShopLabel(state.settings);
     panel.append(
       el('div', { class: 'step-intro' }, [
-        el('h2', { class: 'step-intro__title', text: 'Upload your screenshots' }),
+        el('h2', { class: 'step-intro__title', text: 'Select your products' }),
         el('p', {
           class: 'step-intro__description',
           text:
             instructions ||
-            `Upload clear screenshots of the specific products you have selected from the ${shopLabel} shop — up to ${state.maxProducts} screenshots. Take each screenshot directly from the shop product page so we can see the exact product you want to collaborate on, then add it to a screenshot field below (one screenshot per field). No product names, descriptions, or links are needed — the screenshots are your selection.`,
+            `Pick the products you want to collaborate on from the official ${shopLabel} shop, then come back here and upload one clear screenshot of each selected product — up to ${state.maxProducts} screenshots. Take each screenshot directly from the shop product page so we can see the exact item you chose, one screenshot per field. No product names, descriptions, or links are needed — the screenshots are your selection.`,
         }),
       ]),
     );
-    const shopUrl = String(state.settings.shop_url || '').trim();
-    if (shopUrl) {
-      panel.append(
-        el('div', { class: 'shop-banner' }, [
-          el('p', {
-            class: 'shop-banner__text',
-            text: `Open the ${shopLabel} shop, take a clear screenshot of each product you have selected, then upload it below.`,
-          }),
-          el('a', {
-            class: 'btn btn--secondary btn--sm',
-            href: shopUrl,
-            target: '_blank',
-            rel: 'noopener noreferrer',
-            text: String(state.settings.shop_button_label || '').trim() || 'Open Official Shop',
-          }),
+    panel.append(
+      el('div', { class: 'shop-banner' }, [
+        el('div', { class: 'shop-banner__body' }, [
+          el('p', { class: 'shop-banner__title', text: `Select your products from the official ${shopLabel} shop` }),
+          el('ol', { class: 'shop-banner__steps' }, [
+            el('li', { text: 'Open the official shop and browse all available products.' }),
+            el('li', { text: 'Choose the products you want to feature and screenshot each one on its product page.' }),
+            el('li', { text: 'Return to this tab and upload one screenshot per product in the fields below.' }),
+          ]),
         ]),
-      );
-    }
+        el('a', {
+          class: 'btn btn--primary btn--sm',
+          href: shopUrl,
+          target: '_blank',
+          rel: 'noopener noreferrer',
+          text: shopButtonLabel,
+        }),
+      ]),
+    );
     productGrid = createProductGrid({
       state,
       onChange: () => {
@@ -701,6 +705,21 @@ function restoreDraft(restored) {
 async function boot() {
   const bootError = $('[data-boot-error]');
   const appRoot = $('[data-wizard-root]');
+
+  // Terms metadata is fetched alongside settings rather than after them, and
+  // only the consent step waits for it — the first step renders the moment its
+  // own data is ready.
+  const termsPromise = getTermsMetadata().catch((error) => {
+    console.warn('terms metadata unavailable', error);
+    return { available: false };
+  });
+  termsPromise.then((meta) => {
+    if (state.terms) return;
+    state.terms = meta;
+    // The consent step may already be on screen (deep link / restored draft).
+    if (state.step >= 4 && appRoot && !appRoot.hidden) renderCurrentStep();
+  });
+
   try {
     const { settings, fields } = await loadPublicSettings();
     state.settings = settings;
@@ -709,16 +728,8 @@ async function boot() {
     state.maxProducts = Math.min(Number(settings.max_products) || 30, 30);
 
     applyBranding(settings);
+    applyShopLinks(settings);
     pageTitle('Apply', settings);
-
-    // terms metadata (non-fatal if it fails — step 4 will retry)
-    try {
-      const meta = await getTermsMetadata();
-      state.terms = meta;
-    } catch (error) {
-      console.warn('terms metadata unavailable', error);
-      state.terms = { available: false };
-    }
 
     if (!state.idempotencyKey) state.idempotencyKey = uuid();
     if (!state.uploadToken) state.uploadToken = newToken();
@@ -734,6 +745,9 @@ async function boot() {
     const restored = restoreDraft(loadDraft());
     if (restored && state.step > STEP_COUNT) state.step = 1;
     if (state.step > STEP_COUNT) state.step = 1;
+    // Entering the consent step requires the terms metadata (deep link or a
+    // draft saved at step 4+); every other step renders without it.
+    if (state.step >= 4) await termsPromise;
     // If draft was restored mid-flow but terms never confirmed, drop to consent step.
     if (restored && state.step >= 4 && !state.terms?.available) {
       state.step = 4;
@@ -753,6 +767,12 @@ async function boot() {
             : 'We could not load the application form. Please refresh the page or try again later.';
     }
     appRoot.hidden = true;
+  } finally {
+    // The transition overlay stays up until the form (or its error state) is
+    // actually in the DOM — never longer.
+    requestAnimationFrame(() => {
+      window.dispatchEvent(new Event('app:ready'));
+    });
   }
 }
 

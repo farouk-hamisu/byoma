@@ -83,10 +83,22 @@
   margin-bottom: var(--space-10);
 }
 
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 .hero__meta {
   color: var(--color-text-muted);
   font-size: 0.875rem;
   margin: 0;
+}
+
+.hero__meta--shop a {
+  color: var(--color-primary);
+  font-weight: 500;
 }
 
 /* Steps preview */
@@ -283,7 +295,10 @@
 }
 
 .how__cta {
-  text-align: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: center;
 }
 
 /* Closing band */
@@ -318,6 +333,25 @@
 
 .closing .btn--primary:hover {
   background: color-mix(in srgb, var(--color-bg) 90%, white);
+}
+
+.closing__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: center;
+}
+
+.closing .btn--secondary {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--color-primary-contrast) 55%, transparent);
+  color: var(--color-primary-contrast);
+}
+
+.closing .btn--secondary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-primary-contrast) 14%, transparent);
+  border-color: var(--color-primary-contrast);
+  color: var(--color-primary-contrast);
 }
 
 @media (min-width: 640px) {

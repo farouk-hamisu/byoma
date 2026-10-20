@@ -4,14 +4,22 @@
 // Connectivity: all requests prefer a same-origin proxy (/api/supabase/* — see the
 // rewrite in vercel.json and scripts/serve.js) so the browser never talks to
 // *.supabase.co directly. That sidesteps extension/DNS/network blocks and any
-// gateway CORS issue. A one-time probe decides proxy vs direct before the client
-// is created; if the proxy is unavailable the client falls back to the project URL.
+// gateway CORS issue. A probe decides proxy vs direct before the client is
+// created (cached for the session so each navigation doesn't repeat it); if the
+// proxy is unavailable the client falls back to the project URL. The Supabase
+// SDK itself is injected by this module — no parser-blocking tag in the page
+// head — so it downloads while the page is already parsing and painting.
 
 import { getConfig, isConfigured, CONFIG_ERROR_MESSAGE } from './config.js';
+
+const SDK_SRC = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.min.js';
+const CONNECTION_CACHE_KEY = 'partnershipy.connection.v1';
+const SDK_TIMEOUT_MS = 15000;
 
 let client = null;
 let connectionPromise = null;
 let resolvedBaseUrl = null;
+let sdkPromise = null;
 
 export class EdgeError extends Error {
   constructor({ code, message, status, retryable }) {
@@ -21,6 +29,52 @@ export class EdgeError extends Error {
     this.status = status || 500;
     this.retryable = retryable !== false && this.status >= 500;
   }
+}
+
+// The Supabase SDK is loaded on demand instead of through a parser-blocking
+// <script> in every page head: the page can paint immediately and the SDK
+// download runs in parallel with the connection probe below.
+function loadSdk() {
+  if (globalThis.supabase?.createClient) return Promise.resolve(null);
+  if (sdkPromise) return sdkPromise;
+  sdkPromise = new Promise((resolve, reject) => {
+    if (typeof document === 'undefined') {
+      reject(sdkMissingError());
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = SDK_SRC;
+    script.async = true;
+    script.crossOrigin = 'anonymous';
+    script.referrerPolicy = 'no-referrer';
+    let settled = false;
+    let timer = null;
+    const settle = (fn, value) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      fn(value);
+    };
+    timer = setTimeout(() => settle(reject, sdkMissingError()), SDK_TIMEOUT_MS);
+    script.onload = () => {
+      if (globalThis.supabase?.createClient) settle(resolve, null);
+      else settle(reject, sdkMissingError());
+    };
+    script.onerror = () => settle(reject, sdkMissingError());
+    document.head.append(script);
+  });
+  // Cache the outcome (including failures) so a broken CDN never queues up
+  // duplicate script tags — recovery is a page refresh.
+  return sdkPromise;
+}
+
+function sdkMissingError() {
+  return new EdgeError({
+    code: 'sdk_missing',
+    message: 'The application failed to load its networking library. Please refresh the page.',
+    status: 0,
+    retryable: false,
+  });
 }
 
 function proxyBaseFor(config) {
@@ -37,11 +91,34 @@ function proxyBaseFor(config) {
   }
 }
 
+// The proxy-vs-direct decision is remembered for the session: navigating from
+// the home page to the application form must not repeat the probe round-trip.
+function readConnectionCache() {
+  try {
+    const raw = globalThis.sessionStorage?.getItem(CONNECTION_CACHE_KEY);
+    return raw === 'proxy' || raw === 'direct' ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeConnectionCache(mode) {
+  try {
+    globalThis.sessionStorage?.setItem(CONNECTION_CACHE_KEY, mode);
+  } catch {
+    /* storage unavailable — the probe simply runs again */
+  }
+}
+
 async function chooseBaseUrl() {
   const config = getConfig();
   if (!isConfigured(config)) return config.supabaseUrl;
   const proxy = proxyBaseFor(config);
   if (!proxy) return config.supabaseUrl;
+
+  const cached = readConnectionCache();
+  if (cached === 'proxy') return proxy;
+  if (cached === 'direct') return config.supabaseUrl;
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 5000);
@@ -52,10 +129,16 @@ async function chooseBaseUrl() {
       headers: { apikey: config.supabaseAnonKey },
       signal: controller.signal,
     });
-    if (response.headers.get('x-supabase-proxy') === '1') return proxy;
+    if (response.headers.get('x-supabase-proxy') === '1') {
+      writeConnectionCache('proxy');
+      return proxy;
+    }
     const type = response.headers.get('content-type') || '';
-    return type.includes('json') && response.status !== 404 ? proxy : config.supabaseUrl;
+    const mode = type.includes('json') && response.status !== 404 ? 'proxy' : 'direct';
+    writeConnectionCache(mode);
+    return mode === 'proxy' ? proxy : config.supabaseUrl;
   } catch {
+    writeConnectionCache('direct');
     return config.supabaseUrl;
   } finally {
     clearTimeout(timer);
@@ -64,17 +147,18 @@ async function chooseBaseUrl() {
 
 // Resolves which base URL to use (memoised). Every entry point may await this,
 // though the module top-level await already guarantees it before first use.
+// The SDK download runs alongside the probe so neither serialises the other.
+// A failed SDK download is intentionally not thrown here — getClient() reports
+// it, so callers keep their own error handling (and the module still evaluates).
 export function ensureConnection() {
   if (!connectionPromise) {
-    connectionPromise = chooseBaseUrl()
-      .then((base) => {
-        resolvedBaseUrl = base;
-        return base;
-      })
-      .catch(() => {
-        resolvedBaseUrl = getConfig().supabaseUrl;
-        return resolvedBaseUrl;
-      });
+    connectionPromise = Promise.all([
+      chooseBaseUrl().catch(() => getConfig().supabaseUrl),
+      loadSdk().catch(() => null),
+    ]).then(([base]) => {
+      resolvedBaseUrl = base;
+      return base;
+    });
   }
   return connectionPromise;
 }

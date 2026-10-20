@@ -40,11 +40,19 @@ export function openTermsViewer({ title = 'Terms & Conditions', fetchDocument = 
       pdf: null,
       pageNum: 1,
       scale: 1.15,
-      renderTask: null,
       document: null,
       opened: false,
       aborted: false,
       usingFallback: false,
+      // One entry per document page. All pages live in the scroll container so
+      // users can scroll straight through the document; only the pages near the
+      // viewport are rasterised, and their bitmaps are released again when far
+      // away so long documents stay memory-safe.
+      pages: [],
+      renderQueue: Promise.resolve(),
+      renderObserver: null,
+      evictObserver: null,
+      scrollRaf: 0,
     };
 
     const titleId = `terms-viewer-title-${Math.random().toString(36).slice(2, 8)}`;
@@ -62,14 +70,14 @@ export function openTermsViewer({ title = 'Terms & Conditions', fetchDocument = 
       class: 'btn btn--secondary btn--sm',
       text: 'Previous',
       'aria-label': 'Previous page',
-      onClick: () => changePage(-1),
+      onClick: () => goToPage(state.pageNum - 1),
     });
     const nextButton = el('button', {
       type: 'button',
       class: 'btn btn--secondary btn--sm',
       text: 'Next',
       'aria-label': 'Next page',
-      onClick: () => changePage(1),
+      onClick: () => goToPage(state.pageNum + 1),
     });
     const pageIndicator = el('span', { class: 'pdf-viewer__page-indicator', text: '—', 'aria-live': 'polite' });
     const zoomOut = el('button', {
@@ -112,7 +120,6 @@ export function openTermsViewer({ title = 'Terms & Conditions', fetchDocument = 
     });
 
     const canvasWrap = el('div', { class: 'pdf-viewer__canvas-wrap' }, [statusRegion]);
-    const canvas = el('canvas', { hidden: true, 'aria-label': 'Terms and Conditions document' });
 
     const toolbar = el('div', { class: 'pdf-viewer__toolbar' }, [
       closeButton,
@@ -163,6 +170,7 @@ export function openTermsViewer({ title = 'Terms & Conditions', fetchDocument = 
     }
 
     function showError(message, { retry = true } = {}) {
+      teardownPages();
       clearNode(canvasWrap);
       const block = el('div', { class: 'pdf-viewer__status' }, [
         el('p', { text: message }),
@@ -193,72 +201,267 @@ export function openTermsViewer({ title = 'Terms & Conditions', fetchDocument = 
       zoomIn.disabled = !pages || state.scale >= 4;
     }
 
-    async function renderPage() {
-      if (!state.pdf || state.aborted) return;
-      if (state.renderTask) {
-        try {
-          state.renderTask.cancel();
-        } catch {
-          /* ignore */
-        }
-        state.renderTask = null;
-      }
+    /* --------------------------------------------------- scrollable pages */
 
-      const page = await state.pdf.getPage(state.pageNum);
-      if (state.aborted) return;
-      const viewport = page.getViewport({ scale: state.scale });
+    function prefersReducedMotion() {
+      return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
+    function pageEntryFor(node) {
+      const index = Number(node?.dataset?.page);
+      return Number.isInteger(index) ? state.pages[index - 1] || null : null;
+    }
+
+    function cancelEntryRender(entry) {
+      if (!entry.renderTask) return;
+      try {
+        entry.renderTask.cancel();
+      } catch {
+        /* ignore */
+      }
+      entry.renderTask = null;
+    }
+
+    // Release a page's bitmap while keeping its placeholder box, so the layout
+    // (and therefore scroll position) never shifts as pages load.
+    function resetEntry(entry) {
+      cancelEntryRender(entry);
+      entry.canvas.width = 0;
+      entry.canvas.height = 0;
+      entry.rendered = false;
+      entry.wrapper.classList.add('pdf-viewer__page--pending');
+    }
+
+    function applyEntrySize(entry, scale) {
+      const viewport = entry.page.getViewport({ scale });
+      const cssWidth = Math.max(1, Math.floor(viewport.width));
+      const cssHeight = Math.max(1, Math.floor(viewport.height));
+      entry.canvas.style.width = `${cssWidth}px`;
+      // aspect-ratio (instead of a fixed inline height) keeps the page from
+      // distorting when `max-width: 100%` clamps it on narrow screens.
+      entry.canvas.style.aspectRatio = `${cssWidth} / ${cssHeight}`;
+    }
+
+    async function renderEntry(entry) {
+      if (state.aborted || entry.rendered || !state.pdf) return;
+      cancelEntryRender(entry);
+      const viewport = entry.page.getViewport({ scale: state.scale });
       const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      const canvas = entry.canvas;
       canvas.width = Math.floor(viewport.width * ratio);
       canvas.height = Math.floor(viewport.height * ratio);
-      canvas.style.width = `${Math.floor(viewport.width)}px`;
-      canvas.style.height = `${Math.floor(viewport.height)}px`;
-      canvas.hidden = false;
-      const context = canvas.getContext('2d');
-      state.renderTask = page.render({
-        canvasContext: context,
+      const task = entry.page.render({
+        canvasContext: canvas.getContext('2d'),
         viewport,
         transform: ratio !== 1 ? [ratio, 0, 0, ratio, 0, 0] : undefined,
       });
+      entry.renderTask = task;
       try {
-        await state.renderTask.promise;
+        await task.promise;
+        if (state.aborted) return;
+        entry.rendered = true;
+        entry.wrapper.classList.remove('pdf-viewer__page--pending');
       } catch (error) {
-        if (error?.name !== 'RenderingCancelledException') throw error;
+        if (error?.name !== 'RenderingCancelledException') {
+          console.error('page render failed', error);
+        }
       } finally {
-        state.renderTask = null;
+        entry.renderTask = null;
       }
-      updateControls();
     }
 
-    async function changePage(delta) {
-      if (!state.pdf) return;
-      const next = state.pageNum + delta;
-      if (next < 1 || next > state.pdf.numPages) return;
-      state.pageNum = next;
-      updateControls();
-      canvasWrap.scrollTop = 0;
-      try {
-        await renderPage();
-      } catch (error) {
-        console.error('page render failed', error);
-        showError('This page could not be displayed.');
+    // Renders are serialised so a fast scroll cannot fan out dozens of
+    // concurrent raster jobs; entries that scrolled out of range are skipped.
+    function scheduleRender(entry) {
+      if (entry.queued || entry.rendered || state.aborted) return;
+      entry.queued = true;
+      state.renderQueue = state.renderQueue.catch(() => {}).then(async () => {
+        entry.queued = false;
+        if (state.aborted || entry.rendered || !entry.visible) return;
+        await renderEntry(entry);
+      });
+    }
+
+    function teardownPages() {
+      state.renderObserver?.disconnect();
+      state.evictObserver?.disconnect();
+      state.renderObserver = null;
+      state.evictObserver = null;
+      canvasWrap.removeEventListener('scroll', onWrapScroll);
+      if (state.scrollRaf) cancelAnimationFrame(state.scrollRaf);
+      state.scrollRaf = 0;
+      for (const entry of state.pages) {
+        entry.visible = false;
+        entry.queued = false;
+        resetEntry(entry);
       }
+      state.pages = [];
+    }
+
+    function observePages() {
+      if (!('IntersectionObserver' in window)) {
+        // Without observers, render everything once rather than showing blanks.
+        state.pages.forEach((entry) => {
+          entry.visible = true;
+          scheduleRender(entry);
+        });
+        return;
+      }
+      // Two bands with a gap between them (600px to render, 1600px to release)
+      // so a page resting near a boundary is neither re-rendered nor released on
+      // every small scroll — no flicker, no render loops.
+      state.renderObserver = new IntersectionObserver(
+        (observed) => {
+          for (const item of observed) {
+            const entry = pageEntryFor(item.target);
+            if (!entry) continue;
+            entry.visible = item.isIntersecting;
+            if (item.isIntersecting) scheduleRender(entry);
+          }
+        },
+        { root: canvasWrap, rootMargin: '600px 0px', threshold: 0 },
+      );
+      state.evictObserver = new IntersectionObserver(
+        (observed) => {
+          for (const item of observed) {
+            if (item.isIntersecting) continue;
+            const entry = pageEntryFor(item.target);
+            if (entry && entry.rendered) resetEntry(entry);
+          }
+        },
+        { root: canvasWrap, rootMargin: '1600px 0px', threshold: 0 },
+      );
+      for (const entry of state.pages) {
+        state.renderObserver.observe(entry.wrapper);
+        state.evictObserver.observe(entry.wrapper);
+      }
+    }
+
+    // The toolbar's page indicator follows the page nearest the top of the
+    // viewport, so it always matches what the user is looking at.
+    function syncCurrentPage() {
+      if (!state.pages.length) return;
+      const wrapRect = canvasWrap.getBoundingClientRect();
+      const line = wrapRect.top + Math.min(wrapRect.height * 0.3, 140);
+      let current = null;
+      let bestDistance = Infinity;
+      for (const entry of state.pages) {
+        const rect = entry.wrapper.getBoundingClientRect();
+        if (rect.top <= line && rect.bottom > line) {
+          current = entry.index;
+          break;
+        }
+        const distance = Math.abs(rect.top - line);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          current = entry.index;
+        }
+      }
+      if (current === null) current = state.pages[0].index;
+      if (current !== state.pageNum) {
+        state.pageNum = current;
+        markCurrentPage();
+        updateControls();
+      }
+    }
+
+    function onWrapScroll() {
+      if (state.scrollRaf) return;
+      state.scrollRaf = requestAnimationFrame(() => {
+        state.scrollRaf = 0;
+        syncCurrentPage();
+      });
+    }
+
+    function markCurrentPage() {
+      for (const entry of state.pages) {
+        const isCurrent = entry.index === state.pageNum;
+        if (isCurrent) {
+          entry.wrapper.setAttribute('data-current', '');
+          entry.wrapper.setAttribute('aria-current', 'page');
+        } else {
+          entry.wrapper.removeAttribute('data-current');
+          entry.wrapper.removeAttribute('aria-current');
+        }
+      }
+    }
+
+    // Previous / Next (and arrow keys) scroll to a page instead of swapping a
+    // single canvas — scrolling and buttons address the same document.
+    function goToPage(index) {
+      if (!state.pages.length) return;
+      const target = Math.min(Math.max(1, index), state.pages.length);
+      const entry = state.pages[target - 1];
+      if (!entry) return;
+      state.pageNum = target;
+      markCurrentPage();
+      updateControls();
+      const wrapRect = canvasWrap.getBoundingClientRect();
+      const rect = entry.wrapper.getBoundingClientRect();
+      const paddingTop = parseFloat(getComputedStyle(canvasWrap).paddingTop) || 0;
+      const top = canvasWrap.scrollTop + (rect.top - wrapRect.top) - paddingTop;
+      canvasWrap.scrollTo({
+        top: Math.max(0, top),
+        behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+      });
+    }
+
+    async function buildPages() {
+      teardownPages();
+      clearNode(canvasWrap);
+      const layer = el('div', { class: 'pdf-viewer__pages' });
+      canvasWrap.append(layer);
+      const total = state.pdf.numPages;
+      for (let index = 1; index <= total; index += 1) {
+        const page = await state.pdf.getPage(index);
+        if (state.aborted) return;
+        const wrapper = el('div', {
+          class: 'pdf-viewer__page pdf-viewer__page--pending',
+          'data-page': String(index),
+        });
+        const canvas = el('canvas', {
+          class: 'pdf-viewer__page-canvas',
+          'aria-label': `Terms and Conditions — page ${index} of ${total}`,
+        });
+        const entry = {
+          index,
+          wrapper,
+          canvas,
+          page,
+          visible: false,
+          queued: false,
+          rendered: false,
+          renderTask: null,
+        };
+        applyEntrySize(entry, state.scale);
+        wrapper.append(canvas);
+        layer.append(wrapper);
+        state.pages.push(entry);
+      }
+      state.pageNum = 1;
+      markCurrentPage();
+      canvasWrap.scrollTop = 0;
+      observePages();
+      canvasWrap.addEventListener('scroll', onWrapScroll, { passive: true });
+      syncCurrentPage();
     }
 
     async function changeZoom(delta) {
       if (!state.pdf) return;
       state.scale = Math.min(4, Math.max(0.5, Math.round((state.scale + delta) * 10) / 10));
       updateControls();
-      try {
-        await renderPage();
-      } catch (error) {
-        console.error('zoom render failed', error);
-        showError('This page could not be displayed.');
+      for (const entry of state.pages) {
+        applyEntrySize(entry, state.scale);
+        const wasVisible = entry.visible;
+        resetEntry(entry);
+        if (wasVisible) scheduleRender(entry);
       }
+      syncCurrentPage();
     }
 
     function useFallback(reason) {
       state.usingFallback = true;
-      state.usingFallback = state.usingFallback;
+      teardownPages();
       clearNode(canvasWrap);
       const iframe = el('iframe', {
         class: 'pdf-viewer__fallback',
@@ -277,6 +480,7 @@ export function openTermsViewer({ title = 'Terms & Conditions', fetchDocument = 
       downloadLink.hidden = true;
       openLink.hidden = true;
       state.opened = false;
+      teardownPages();
       clearNode(canvasWrap);
       statusRegion = el('div', {
         class: 'pdf-viewer__status',
@@ -325,10 +529,8 @@ export function openTermsViewer({ title = 'Terms & Conditions', fetchDocument = 
         if (state.aborted) return;
 
         state.pageNum = 1;
-        clearNode(canvasWrap);
-        canvasWrap.append(canvas);
+        await buildPages();
         updateControls();
-        await renderPage();
       } catch (error) {
         if (state.aborted) return;
         if (state.document?.url && (error?.name === 'TypeError' || String(error?.message || '').includes('document_fetch'))) {
@@ -345,13 +547,7 @@ export function openTermsViewer({ title = 'Terms & Conditions', fetchDocument = 
       if (state.aborted) return;
       state.aborted = true;
       state.abortController?.abort();
-      if (state.renderTask) {
-        try {
-          state.renderTask.cancel();
-        } catch {
-          /* ignore */
-        }
-      }
+      teardownPages();
       state.pdf?.destroy?.();
       backdrop.remove();
       document.body.style.removeProperty('overflow');
@@ -380,9 +576,9 @@ export function openTermsViewer({ title = 'Terms & Conditions', fetchDocument = 
         event.preventDefault();
         close();
       } else if (event.key === 'ArrowRight' && state.pdf && !state.usingFallback) {
-        changePage(1);
+        goToPage(state.pageNum + 1);
       } else if (event.key === 'ArrowLeft' && state.pdf && !state.usingFallback) {
-        changePage(-1);
+        goToPage(state.pageNum - 1);
       }
     }
 

@@ -3,6 +3,7 @@
 import { $ } from '../utils/dom.js';
 import { loadPublicSettings } from './api.js';
 import { applyBranding, pageTitle } from './branding.js';
+import { applyShopLinks } from './shop.js';
 
 const params = new URLSearchParams(window.location.search);
 
@@ -44,6 +45,7 @@ $('[data-save-pdf]')?.addEventListener('click', () => {
 loadPublicSettings()
   .then(({ settings }) => {
     applyBranding(settings);
+    applyShopLinks(settings);
     pageTitle('Application received', settings);
   })
   .catch((error) => {

@@ -5,8 +5,9 @@ import { toast } from '../utils/toast.js';
 import { hasStoredDraft, clearDraft } from '../utils/draft.js';
 import { loadPublicSettings } from './api.js';
 import { applyBranding, pageTitle } from './branding.js';
+import { applyShopLinks } from './shop.js';
 import { openTermsViewer } from './terms-viewer.js';
-import { showLoader, NAV_FLAG } from './loader.js';
+import { showLoader, NAV_FLAG } from './page-loader.js';
 
 const COPY_KEYS = [
   'welcome_eyebrow',
@@ -35,8 +36,9 @@ function applyInstructions(settings) {
   const wrap = $('[data-instructions]');
   const text = $('[data-instructions-text]');
   if (!section) return;
-  if (settings.application_instructions && text) {
-    text.textContent = settings.application_instructions;
+  const instructions = String(settings.application_instructions || '').trim();
+  if (instructions && text) {
+    text.textContent = instructions;
     wrap.hidden = false;
   }
   section.hidden = false;
@@ -126,6 +128,7 @@ async function boot() {
     applyBranding(settings);
     pageTitle('', settings);
     applyCopy(settings);
+    applyShopLinks(settings);
     applyInstructions(settings);
     applyPausedState(settings);
     bindTermsLink();

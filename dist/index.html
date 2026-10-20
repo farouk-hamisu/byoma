@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="/css/base.css" />
   <link rel="stylesheet" href="/css/components.css" />
   <link rel="stylesheet" href="/css/welcome.css" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script type="module" src="/js/public/welcome.js"></script>
 </head>
 <body data-page="welcome">
@@ -53,8 +53,22 @@
         </p>
 
         <div class="hero__cta">
-          <a href="/apply.html" class="btn btn--primary btn--lg" data-start-button>Start application</a>
+          <div class="hero__actions">
+            <a href="/apply.html" class="btn btn--primary btn--lg" data-start-button>Start application</a>
+            <a
+              href="https://www.furtunaskin.com/collections/all"
+              class="btn btn--secondary btn--lg"
+              data-shop-link
+              target="_blank"
+              rel="noopener noreferrer"
+            >Visit Shop</a>
+          </div>
           <p class="hero__meta" data-estimated-time>Takes about 10–15 minutes · No account required</p>
+          <p class="hero__meta hero__meta--shop">
+            Not sure what to pick?
+            <a data-shop-link href="https://www.furtunaskin.com/collections/all" target="_blank" rel="noopener noreferrer">Browse the official shop</a>
+            and note the products you want to feature.
+          </p>
         </div>
 
         <ol class="steps-preview" aria-label="Application steps">
@@ -75,8 +89,11 @@
           <li class="steps-preview__item">
             <span class="steps-preview__index" aria-hidden="true">3</span>
             <div>
-              <h2 class="steps-preview__title">Your content</h2>
-              <p>Upload up to 30 product photos and details from your skincare content.</p>
+              <h2 class="steps-preview__title">Choose your products</h2>
+              <p>
+                Browse the official shop, select the products you want to collaborate on, then
+                upload a screenshot of each one (up to 30).
+              </p>
             </div>
           </li>
         </ol>
@@ -112,7 +129,10 @@
         <div class="how__grid">
           <article class="card how-card">
             <h3>1. Apply</h3>
-            <p>Complete the application below. You can save and resume on this device — no account needed.</p>
+            <p>
+              Browse the official shop, pick the products you want, and complete the application
+              below. You can save and resume on this device — no account needed.
+            </p>
           </article>
           <article class="card how-card">
             <h3>2. Review</h3>
@@ -124,7 +144,14 @@
           </article>
         </div>
         <div class="how__cta">
-          <a href="/apply.html" class="btn btn--secondary" data-start-button>Start application</a>
+          <a href="/apply.html" class="btn btn--primary" data-start-button>Start application</a>
+          <a
+            href="https://www.furtunaskin.com/collections/all"
+            class="btn btn--secondary"
+            data-shop-link
+            target="_blank"
+            rel="noopener noreferrer"
+          >Browse Products</a>
         </div>
       </div>
     </section>
@@ -138,7 +165,16 @@
           sponsored content, and long-term brand ambassadorships for creators who love
           clean, effective skincare.
         </p>
-        <a href="/apply.html" class="btn btn--primary btn--lg" data-start-button>Start application</a>
+        <div class="closing__actions">
+          <a href="/apply.html" class="btn btn--primary btn--lg" data-start-button>Start application</a>
+          <a
+            href="https://www.furtunaskin.com/collections/all"
+            class="btn btn--secondary btn--lg"
+            data-shop-link
+            target="_blank"
+            rel="noopener noreferrer"
+          >Visit Shop</a>
+        </div>
       </div>
     </section>
   </main>
@@ -147,6 +183,12 @@
     <div class="container site-footer__inner">
       <p data-footer-text>© 2026 Furtuna Skin</p>
       <nav class="site-footer__nav" aria-label="Footer">
+        <a
+          data-shop-link
+          href="https://www.furtunaskin.com/collections/all"
+          target="_blank"
+          rel="noopener noreferrer"
+        >Shop</a>
         <a data-privacy-link href="/privacy.html">Privacy</a>
         <a href="#" data-terms-link>Terms &amp; Conditions</a>
         <a data-contact-email data-contact-label="Contact us" href="#" hidden>Contact us</a>

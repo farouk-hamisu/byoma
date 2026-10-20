@@ -2,7 +2,41 @@
 
 import { getClient, invokeEdge, EdgeError, ensureConnection } from '../supabase.js';
 
+// Settings are read on every public page (home → apply → confirmation). A short
+// session cache means the application form renders from data the home page
+// already fetched instead of paying for a second round-trip during the loading
+// screen. Short enough that admin changes show up quickly.
+const SETTINGS_CACHE_KEY = 'partnershipy.settings.v1';
+const SETTINGS_CACHE_TTL_MS = 60_000;
+
+function readSettingsCache() {
+  try {
+    const raw = globalThis.sessionStorage?.getItem(SETTINGS_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed.savedAt !== 'number' || !parsed.data) return null;
+    if (Date.now() - parsed.savedAt > SETTINGS_CACHE_TTL_MS) return null;
+    return parsed.data;
+  } catch {
+    return null;
+  }
+}
+
+function writeSettingsCache(data) {
+  try {
+    globalThis.sessionStorage?.setItem(
+      SETTINGS_CACHE_KEY,
+      JSON.stringify({ savedAt: Date.now(), data }),
+    );
+  } catch {
+    /* storage unavailable — every page just fetches normally */
+  }
+}
+
 export async function loadPublicSettings() {
+  const cached = readSettingsCache();
+  if (cached) return cached;
+
   await ensureConnection();
   const supabase = getClient();
   const [settingsResult, fieldsResult] = await Promise.all([
@@ -35,10 +69,12 @@ export async function loadPublicSettings() {
     });
   }
 
-  return {
+  const data = {
     settings: settingsResult.data || {},
     fields: fieldsResult.data || [],
   };
+  writeSettingsCache(data);
+  return data;
 }
 
 // Metadata for the currently published Terms & Conditions.
