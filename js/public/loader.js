@@ -26,7 +26,7 @@ function ensureOverlay(message) {
   spinner.setAttribute('aria-hidden', 'true');
   const text = document.createElement('span');
   text.className = 'page-loader__message';
-  text.textContent = 'Loading…';
+  text.textContent = 'Loading application…';
   box.append(spinner, text);
   overlay.append(box);
   document.body.append(overlay);
@@ -41,7 +41,7 @@ function setMessage(message) {
   if (text && message) text.textContent = message;
 }
 
-export function showLoader(message = 'Loading…') {
+export function showLoader(message = 'Loading application…') {
   clearTimeout(hideTimer);
   depth += 1;
   ensureOverlay(message);
