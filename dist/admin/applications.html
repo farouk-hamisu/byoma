@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Applications · Fortuna Skin</title>
+  <link rel="icon" type="image/jpeg" href="/public/furtunaskin.jpg" />
+  <script src="/env.js"></script>
+  <link rel="stylesheet" href="/css/tokens.css" />
+  <link rel="stylesheet" href="/css/base.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <link rel="stylesheet" href="/css/admin.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script type="module" src="/js/admin/applications.js"></script>
+</head>
+<body data-admin-guard>
+  <div class="admin-layout">
+    <aside class="admin-sidebar" data-admin-sidebar></aside>
+    <div class="admin-main">
+      <header class="admin-header" data-admin-header></header>
+      <main class="admin-content" id="main">
+        <div>
+          <h1 class="admin-page-title">Applications</h1>
+          <p class="admin-page-subtitle">Search, filter and review partnership applications.</p>
+        </div>
+
+        <form class="toolbar" data-filters>
+          <div class="field toolbar__grow">
+            <label class="field__label" for="search">Search</label>
+            <input class="input" type="search" id="search" name="search" placeholder="Reference, name, email or handle…" />
+          </div>
+          <div class="field">
+            <label class="field__label" for="status">Status</label>
+            <select class="input" id="status" name="status">
+              <option value="">All statuses</option>
+              <option value="new">New</option>
+              <option value="under_review">Under review</option>
+              <option value="more_info">More info needed</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field__label" for="reviewer">Reviewer</label>
+            <select class="input" id="reviewer" name="reviewer">
+              <option value="">Anyone</option>
+              <option value="none">Unassigned</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field__label" for="sort">Sort</label>
+            <select class="input" id="sort" name="sort">
+              <option value="submitted_at.desc">Newest first</option>
+              <option value="submitted_at.asc">Oldest first</option>
+              <option value="reference.asc">Reference A–Z</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn--primary">Apply</button>
+        </form>
+
+        <div class="bulk-bar" data-bulk hidden>
+          <span data-bulk-count>0 selected</span>
+          <label class="visually-hidden" for="bulk-status">Set status</label>
+          <select class="input" id="bulk-status" style="width:auto">
+            <option value="">Change status to…</option>
+            <option value="new">New</option>
+            <option value="under_review">Under review</option>
+            <option value="more_info">More info needed</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <button type="button" class="btn btn--secondary btn--sm" data-bulk-apply>Apply to selected</button>
+          <button type="button" class="btn btn--ghost btn--sm" data-bulk-clear>Clear</button>
+        </div>
+
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="checkbox-cell"><input type="checkbox" data-select-all aria-label="Select all rows" /></th>
+                <th>Reference</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Handles</th>
+                <th>Status</th>
+                <th>Products</th>
+                <th>Submitted</th>
+                <th>Reviewer</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody data-rows>
+              <tr><td colspan="10" class="empty">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <span data-page-info>—</span>
+          <div style="display:flex;gap:var(--space-2)">
+            <button type="button" class="btn btn--secondary btn--sm" data-prev disabled>← Previous</button>
+            <button type="button" class="btn btn--secondary btn--sm" data-next disabled>Next →</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

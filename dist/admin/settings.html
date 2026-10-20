@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Settings · Fortuna Skin</title>
+  <link rel="icon" type="image/jpeg" href="/public/furtunaskin.jpg" />
+  <script src="/env.js"></script>
+  <link rel="stylesheet" href="/css/tokens.css" />
+  <link rel="stylesheet" href="/css/base.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+  <link rel="stylesheet" href="/css/admin.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script type="module" src="/js/admin/settings.js"></script>
+</head>
+<body data-admin-guard>
+  <div class="admin-layout">
+    <aside class="admin-sidebar" data-admin-sidebar></aside>
+    <div class="admin-main">
+      <header class="admin-header" data-admin-header></header>
+      <main class="admin-content" id="main">
+        <div>
+          <h1 class="admin-page-title">Settings</h1>
+          <p class="admin-page-subtitle">Branding, copy, application limits and upload rules.</p>
+        </div>
+
+        <div class="alert alert--success" data-saved hidden role="status">Saved.</div>
+        <div class="alert alert--danger" data-error hidden role="alert"></div>
+
+        <form class="settings-grid" data-settings-form>
+          <section class="detail-section">
+            <h2 class="detail-section__title">Branding</h2>
+            <div class="form-row">
+              <label for="brand_name">Brand name</label>
+              <input class="input" type="text" id="brand_name" maxlength="120" />
+            </div>
+            <div class="form-row">
+              <label for="logo_url">Logo URL (optional override)</label>
+              <input class="input" type="url" id="logo_url" placeholder="https://…" />
+              <p class="field__help">The site header always uses the official Fortuna Skin logo (public/furtunaskin.jpg). This URL is stored for reference only.</p>
+            </div>
+            <div class="form-row form-row--inline">
+              <div>
+                <label for="primary_color">Primary colour</label>
+                <input class="input" type="color" id="primary_color" style="height:2.5rem;padding:4px" />
+              </div>
+              <div>
+                <label for="secondary_color">Secondary colour</label>
+                <input class="input" type="color" id="secondary_color" style="height:2.5rem;padding:4px" />
+              </div>
+              <div>
+                <label for="background_color">Background colour</label>
+                <input class="input" type="color" id="background_color" style="height:2.5rem;padding:4px" />
+              </div>
+            </div>
+            <div class="form-row">
+              <label for="font_selection">Font style</label>
+              <select class="input" id="font_selection">
+                <option value="editorial">Editorial (serif headings)</option>
+                <option value="modern">Modern (sans throughout)</option>
+                <option value="classic">Classic (book serif)</option>
+              </select>
+            </div>
+          </section>
+
+          <section class="detail-section">
+            <h2 class="detail-section__title">Public copy</h2>
+            <div class="form-row">
+              <label for="welcome_eyebrow">Welcome eyebrow</label>
+              <input class="input" type="text" id="welcome_eyebrow" maxlength="120" />
+            </div>
+            <div class="form-row">
+              <label for="welcome_heading">Welcome heading</label>
+              <input class="input" type="text" id="welcome_heading" maxlength="200" />
+            </div>
+            <div class="form-row">
+              <label for="welcome_description">Welcome description</label>
+              <textarea class="input input--textarea" id="welcome_description" rows="3" maxlength="1000"></textarea>
+            </div>
+            <div class="form-row">
+              <label for="welcome_button_label">Start button label</label>
+              <input class="input" type="text" id="welcome_button_label" maxlength="60" />
+            </div>
+            <div class="form-row">
+              <label for="applications_paused_message">Closure message</label>
+              <textarea class="input input--textarea" id="applications_paused_message" rows="2" maxlength="500"></textarea>
+            </div>
+            <div class="form-row">
+              <label for="application_instructions">Application instructions</label>
+              <textarea class="input input--textarea" id="application_instructions" rows="4" maxlength="4000"></textarea>
+            </div>
+            <div class="form-row">
+              <label for="footer_text">Footer text</label>
+              <input class="input" type="text" id="footer_text" maxlength="200" />
+            </div>
+            <div class="form-row">
+              <label for="contact_email">Contact email</label>
+              <input class="input" type="email" id="contact_email" maxlength="254" />
+            </div>
+            <div class="form-row">
+              <label for="privacy_policy_url">Privacy policy URL</label>
+              <input class="input" type="url" id="privacy_policy_url" placeholder="https://… or /privacy.html" />
+            </div>
+            <div class="form-row">
+              <label for="estimated_time">Estimated time label</label>
+              <input class="input" type="text" id="estimated_time" maxlength="120" placeholder="Takes about 10–15 minutes" />
+            </div>
+          </section>
+
+          <section class="detail-section">
+            <h2 class="detail-section__title">Application rules</h2>
+            <div class="form-row form-row--inline">
+              <div>
+                <label for="min_products">Minimum products</label>
+                <input class="input" type="number" id="min_products" min="0" max="30" />
+              </div>
+              <div>
+                <label for="max_products">Maximum products</label>
+                <input class="input" type="number" id="max_products" min="1" max="30" />
+              </div>
+            </div>
+            <div class="form-row form-row--inline">
+              <label for="product_image_enabled">Allow product images</label>
+              <label class="switch"><input type="checkbox" id="product_image_enabled" /><span class="visually-hidden">Enable</span></label>
+            </div>
+            <div class="form-row form-row--inline">
+              <label for="applications_paused">Pause applications (public site shows closed notice)</label>
+              <label class="switch"><input type="checkbox" id="applications_paused" /><span class="visually-hidden">Paused</span></label>
+            </div>
+          </section>
+
+          <section class="detail-section">
+            <h2 class="detail-section__title">Uploads & notifications</h2>
+            <div class="form-row">
+              <label for="max_upload_mb">Max upload size (MB)</label>
+              <input class="input" type="number" id="max_upload_mb" min="1" max="50" />
+            </div>
+            <div class="form-row">
+              <span class="field__label">Accepted image types</span>
+              <div style="display:flex;gap:var(--space-4);flex-wrap:wrap;margin-top:var(--space-2)">
+                <label class="switch" style="gap:var(--space-2)"><input type="checkbox" id="type_jpeg" style="width:1.25rem;height:1.25rem" /><span>JPEG</span></label>
+                <label class="switch" style="gap:var(--space-2)"><input type="checkbox" id="type_png" style="width:1.25rem;height:1.25rem" /><span>PNG</span></label>
+                <label class="switch" style="gap:var(--space-2)"><input type="checkbox" id="type_webp" style="width:1.25rem;height:1.25rem" /><span>WebP</span></label>
+              </div>
+            </div>
+            <div class="form-row form-row--inline">
+              <label for="notify_applicant_confirmation">Send applicant confirmation email</label>
+              <label class="switch"><input type="checkbox" id="notify_applicant_confirmation" /><span class="visually-hidden">Enable</span></label>
+            </div>
+            <div class="form-row">
+              <label for="admin_notification_email">Admin notification email</label>
+              <input class="input" type="email" id="admin_notification_email" maxlength="254" />
+            </div>
+            <div class="form-row form-row--inline">
+              <label for="notify_admin_on_submission">Notify admin on new submission</label>
+              <label class="switch"><input type="checkbox" id="notify_admin_on_submission" /><span class="visually-hidden">Enable</span></label>
+            </div>
+          </section>
+
+          <div>
+            <button type="submit" class="btn btn--primary btn--lg" data-save>Save settings</button>
+          </div>
+        </form>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

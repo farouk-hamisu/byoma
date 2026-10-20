@@ -9,6 +9,7 @@
     "serve": "node scripts/serve.js",
     "check": "node scripts/check-js.js",
     "bundle": "node scripts/bundle-functions.mjs",
+    "build": "node scripts/vercel-build.mjs",
     "test:db": "bash supabase/tests/run.sh"
   }
 }
