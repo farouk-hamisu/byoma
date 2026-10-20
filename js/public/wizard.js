@@ -17,6 +17,7 @@ import { renderFieldStep, validateField, validateHandlesList } from './step-fiel
 import { createProductGrid, createEmptyProduct, ACCEPTED_IMAGE_TYPES, hasReadyScreenshot } from './product-grid.js';
 import { openTermsViewer } from './terms-viewer.js';
 import { renderReview } from './review.js';
+import { showLoader, hideLoader } from './loader.js';
 
 const STEP_COUNT = 5;
 const STEP_TITLES = [
@@ -600,12 +601,14 @@ async function submit() {
     submitBtn.textContent = 'Submitting…';
   }
   clearAlert();
+  showLoader('Submitting application…');
 
   try {
     const payload = buildSubmissionPayload();
     const result = await submitApplication(payload);
 
-    // success — clear draft, hand off to confirmation
+    // success — clear draft, hand off to confirmation (loader stays visible
+    // through the navigation so there is no flash of the form)
     await clearDraft();
     const params = new URLSearchParams({
       ref: result.reference || '',
@@ -617,6 +620,7 @@ async function submit() {
     window.location.href = `/confirmation.html?${params.toString()}`;
   } catch (error) {
     console.error('submission failed', error);
+    hideLoader();
     state.submitting = false;
     if (submitBtn) {
       submitBtn.disabled = false;

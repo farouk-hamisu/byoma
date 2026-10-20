@@ -333,6 +333,60 @@
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* Full-screen loading overlay: page transitions and form submissions */
+.page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: var(--space-5);
+  background: color-mix(in srgb, var(--color-surface) 94%, transparent);
+  backdrop-filter: blur(2px);
+  animation: fade-in 150ms ease;
+  transition: opacity 200ms ease;
+}
+
+.page-loader.is-hiding {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.page-loader__box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: center;
+}
+
+.page-loader__spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid color-mix(in srgb, var(--color-primary) 25%, transparent);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 700ms linear infinite;
+}
+
+.page-loader__message {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  letter-spacing: 0.01em;
+}
+
+body.page-loader-open {
+  overflow: hidden;
+}
+
+@media (max-width: 480px) {
+  .page-loader__spinner {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+}
+
 .loading-row {
   display: flex;
   align-items: center;

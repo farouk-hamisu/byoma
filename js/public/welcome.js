@@ -6,6 +6,7 @@ import { hasStoredDraft, clearDraft } from '../utils/draft.js';
 import { loadPublicSettings } from './api.js';
 import { applyBranding, pageTitle } from './branding.js';
 import { openTermsViewer } from './terms-viewer.js';
+import { showLoader, NAV_FLAG } from './loader.js';
 
 const COPY_KEYS = [
   'welcome_eyebrow',
@@ -87,6 +88,28 @@ function bindResumeCard() {
   });
 }
 
+function bindStartButtons() {
+  $$('[data-start-button]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      if (button.getAttribute('aria-disabled') === 'true') return; // paused — blockStart handles it
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return; // let modified clicks behave normally
+      const href = button.getAttribute('href');
+      if (!href) return;
+      event.preventDefault();
+      try {
+        sessionStorage.setItem(NAV_FLAG, '1');
+      } catch {
+        /* storage unavailable — loader still shows for this page */
+      }
+      showLoader('Loading application…');
+      // One frame so the overlay paints before navigation starts.
+      requestAnimationFrame(() => {
+        window.location.href = href;
+      });
+    });
+  });
+}
+
 function showBootError(message) {
   const section = $('[data-boot-error]');
   const msg = $('[data-boot-error-message]');
@@ -124,4 +147,5 @@ $('[data-retry-boot]')?.addEventListener('click', () => {
   boot();
 });
 
+bindStartButtons();
 boot();
