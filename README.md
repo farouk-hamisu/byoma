@@ -1,6 +1,6 @@
-# Fortuna Skin — Creator Partnership Application Platform
+# Furtuna Skin — Creator Partnership Application Platform
 
-A production-ready creator partnership application system for **Fortuna Skin**:
+A production-ready creator partnership application system for **Furtuna Skin**:
 a public multi-step applicant wizard and a private admin dashboard. Built with plain HTML, CSS and
 ES modules plus Supabase (Postgres, Auth, Storage, Edge Functions). No frontend
 framework, no build step.

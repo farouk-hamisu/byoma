@@ -151,7 +151,7 @@ export function renderReview({ state, container, settings = {} }) {
 export async function printApplicationSnapshot(application, { products = [], filesByProduct = new Map(), settings = {} } = {}) {
   const host = el('div', { class: 'print-sheet print-sheet--standalone', 'aria-hidden': 'true' });
   host.append(el('h1', { text: `Application ${application.reference || ''}`.trim() }));
-  host.append(el('p', { text: `${settings.brand_name || 'Fortuna Skin'} · Submitted ${application.submitted_at ? new Date(application.submitted_at).toLocaleString() : '—'}` }));
+  host.append(el('p', { text: `${settings.brand_name || 'Furtuna Skin'} · Submitted ${application.submitted_at ? new Date(application.submitted_at).toLocaleString() : '—'}` }));
 
   const dl = el('dl', { class: 'print-sheet__list' });
   [

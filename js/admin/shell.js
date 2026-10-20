@@ -29,7 +29,7 @@ export function renderShell({ profile, active = null } = {}) {
       width: '28',
       height: '28',
     }),
-    el('span', { class: 'admin-brand__name', text: 'Fortuna Skin admin' }),
+    el('span', { class: 'admin-brand__name', text: 'Furtuna Skin admin' }),
   ]);
   sidebar.append(brand);
 
