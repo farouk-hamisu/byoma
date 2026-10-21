@@ -15,7 +15,13 @@ import {
 import { applyBranding, pageTitle } from './branding.js';
 import { applyShopLinks, resolveShopUrl, resolveShopLabel } from './shop.js';
 import { renderFieldStep, validateField, validateHandlesList } from './step-fields.js';
-import { createProductGrid, createEmptyProduct, ACCEPTED_IMAGE_TYPES, hasReadyScreenshot } from './product-grid.js';
+import {
+  createProductGrid,
+  createEmptyProduct,
+  ACCEPTED_IMAGE_TYPES,
+  hasReadyScreenshot,
+  validateProductList,
+} from './product-grid.js';
 import { openTermsViewer } from './terms-viewer.js';
 import { renderReview } from './review.js';
 import { showLoader, hideLoader } from './page-loader.js';
@@ -95,17 +101,27 @@ function renderStepper(activeStep) {
     ]);
     const label = el('span', { class: 'wizard-step__label', text: STEP_TITLES[i - 1] });
 
-    if (i < activeStep) {
-      // Completed steps are clickable: jump back to review or correct answers.
+    if (i === activeStep) {
+      item.append(el('div', { class: 'wizard-step__body' }, [index, label]));
+    } else {
+      // Completed steps jump back; upcoming steps are clickable too, but only
+      // once every step in between validates (see jumpForward).
+      const forward = i > activeStep;
       item.append(
         el(
           'button',
           {
             type: 'button',
             class: 'wizard-step__body',
-            'aria-label': `Go back to step ${i}: ${STEP_TITLES[i - 1]}`,
+            'aria-label': forward
+              ? `Go to step ${i}: ${STEP_TITLES[i - 1]}`
+              : `Go back to step ${i}: ${STEP_TITLES[i - 1]}`,
             onClick: () => {
-              if (i >= state.step) return;
+              if (i === state.step) return;
+              if (forward) {
+                jumpForward(i);
+                return;
+              }
               // Validate the step being left (same rule as the Back button) so
               // in-progress answers are never discarded silently.
               if (!canLeaveStep(state.step)) return;
@@ -115,8 +131,6 @@ function renderStepper(activeStep) {
           [index, label],
         ),
       );
-    } else {
-      item.append(el('div', { class: 'wizard-step__body' }, [index, label]));
     }
 
     if (i === activeStep) item.setAttribute('aria-current', 'step');
@@ -385,6 +399,35 @@ function canLeaveStep(step) {
     return true;
   }
   return true;
+}
+
+/** Side-effect-free check: is this step's content valid right now? */
+function stepIsComplete(step) {
+  if (step === 1 || step === 2) return validateStepFields(step).length === 0;
+  if (step === 3) {
+    if (productGrid) return productGrid.validate().length === 0;
+    // Grid not rendered yet (deep link / jump before visiting the step) —
+    // validate the raw draft state instead, same rule as submit().
+    return validateProductList(state.products, state.settings || {}).length === 0;
+  }
+  if (step === 4) return consentGateMet();
+  return true;
+}
+
+/**
+ * Jump forward from the current step to a later one from the stepper.
+ * Every step between must validate first — clicking a later number never
+ * skips required answers. On failure the first incomplete step is shown with
+ * its inline errors and the alert so the user sees exactly what to correct.
+ */
+function jumpForward(target) {
+  for (let step = state.step; step < target; step += 1) {
+    if (stepIsComplete(step)) continue;
+    if (step !== state.step) goToStep(step); // surface the first incomplete step
+    canLeaveStep(state.step); // paint its inline errors and the alert
+    return;
+  }
+  goToStep(target);
 }
 
 function renderCurrentStep() {
