@@ -106,6 +106,7 @@ const TYPES = {
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.webp': 'image/webp',
+  '.avif': 'image/avif',
   '.ico': 'image/x-icon',
   '.pdf': 'application/pdf',
   '.txt': 'text/plain; charset=utf-8',

@@ -187,13 +187,27 @@ kbd {
 }
 
 .brand__logo {
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: var(--radius-md);
-  object-fit: contain;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  width: 8.5rem;
+  height: auto;
+  aspect-ratio: 300 / 61;
+  padding: 0.45rem 0.6rem;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
   flex: none;
+}
+
+/* The official logo is a full "BYOMA" wordmark — the adjacent name text
+   would duplicate it. Hidden visually but kept in the DOM (runtime branding
+   still writes to it, and branding.js reveals it if the logo fails to load). */
+.brand .brand__name {
+  display: none;
+}
+
+@media (max-width: 560px) {
+  .brand__logo {
+    width: 6.5rem;
+    padding: 0.4rem 0.5rem;
+  }
 }
 
 .brand__name {

@@ -23,10 +23,10 @@ function ensureOverlay(message) {
   box.className = 'page-loader__box';
   const logo = document.createElement('img');
   logo.className = 'page-loader__logo';
-  logo.src = '/assets/byomalogo.jpg';
+  logo.src = '/assets/Byomalogo.avif';
   logo.alt = '';
-  logo.width = 48;
-  logo.height = 48;
+  logo.width = 300;
+  logo.height = 61;
   logo.setAttribute('aria-hidden', 'true');
   const spinner = document.createElement('span');
   spinner.className = 'page-loader__spinner';

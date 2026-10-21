@@ -361,10 +361,12 @@
 }
 
 .page-loader__logo {
-  width: 3rem;
-  height: 3rem;
-  object-fit: contain;
-  border-radius: var(--radius-md);
+  width: 9rem;
+  height: auto;
+  aspect-ratio: 300 / 61;
+  padding: 0.5rem 0.7rem;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
 }
 
 .page-loader__spinner {

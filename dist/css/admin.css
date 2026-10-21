@@ -35,11 +35,12 @@ body[data-admin-guard] {
 }
 
 .admin-brand__logo {
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 6.5rem;
+  height: auto;
+  aspect-ratio: 300 / 61;
+  padding: 0.3rem 0.45rem;
   border-radius: var(--radius-sm);
-  object-fit: contain;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.1);
   flex: none;
 }
 
@@ -585,13 +586,13 @@ body[data-admin-guard] {
 
 .login-card__logo {
   display: block;
-  width: 4rem;
-  height: 4rem;
-  object-fit: contain;
+  width: min(11rem, 100%);
+  height: auto;
+  aspect-ratio: 300 / 61;
+  padding: 0.6rem 0.8rem;
   margin: 0 auto var(--space-4);
   border-radius: var(--radius-md);
-  background: #fff;
-  border: 1px solid var(--color-border);
+  background: var(--color-primary);
 }
 
 .login-card .field {

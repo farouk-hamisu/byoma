@@ -1,8 +1,8 @@
 // Applies administrator-managed branding to every public page.
-// The official BYOMA logo (assets/byomalogo.jpg) is the platform mark and
+// The official BYOMA logo (assets/Byomalogo.avif) is the platform mark and
 // is used consistently; administrators can still tune colours, fonts and copy.
 
-export const OFFICIAL_LOGO = '/assets/byomalogo.jpg';
+export const OFFICIAL_LOGO = '/assets/Byomalogo.avif';
 const DEFAULT_BRAND = 'BYOMA';
 
 function luminance(hex) {
@@ -41,6 +41,11 @@ export function applyBranding(settings = {}) {
     node.hidden = false;
     node.addEventListener('error', () => {
       node.hidden = true;
+      // The wordmark carries the visible brand name (CSS hides .brand__name);
+      // fall back to the text so the header is never left blank.
+      document.querySelectorAll('.brand__name').forEach((name) => {
+        name.style.display = 'inline';
+      });
     }, { once: true });
   });
 

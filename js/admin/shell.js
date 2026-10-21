@@ -24,12 +24,12 @@ export function renderShell({ profile, active = null } = {}) {
   const brand = el('a', { class: 'admin-brand', href: '/admin/' }, [
     el('img', {
       class: 'admin-brand__logo',
-      src: '/assets/byomalogo.jpg',
+      src: '/assets/Byomalogo.avif',
       alt: '',
-      width: '28',
-      height: '28',
+      width: '300',
+      height: '61',
     }),
-    el('span', { class: 'admin-brand__name', text: 'BYOMA admin' }),
+    el('span', { class: 'admin-brand__name', text: 'Admin' }),
   ]);
   sidebar.append(brand);
 
