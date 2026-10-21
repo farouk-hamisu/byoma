@@ -53,6 +53,7 @@ const state = {
 
 let stepFieldController = null;
 let productGrid = null;
+let reviewController = null;
 
 /* ------------------------------------------------------------------ helpers */
 
@@ -339,7 +340,17 @@ function renderReviewStep() {
   );
   const container = el('div', { 'data-review-body': true });
   panel.append(container);
-  renderReview({ state, container, settings: state.settings });
+  reviewController = renderReview({ state, container, settings: state.settings });
+
+  const printRow = el('div', { class: 'review-print-row' }, [
+    el('button', {
+      type: 'button',
+      class: 'btn btn--ghost btn--sm',
+      text: 'Print / Save as PDF',
+      onClick: () => reviewController?.print(),
+    }),
+  ]);
+  panel.append(printRow);
 }
 
 /* -------------------------------------------------------------- step routing */
